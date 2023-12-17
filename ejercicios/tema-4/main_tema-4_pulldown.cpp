@@ -24,12 +24,22 @@ void app_main() {
     config_input.mode = GPIO_MODE_INPUT;
     config_input.pin_bit_mask = (1ULL << INPUT_PIN);
     config_input.intr_type = GPIO_INTR_DISABLE;
-    config_input.pull_down_en = GPIO_PULLDOWN_DISABLE;
-    config_input.pull_up_en = GPIO_PULLUP_ENABLE;
+    config_input.pull_down_en = GPIO_PULLDOWN_ENABLE;
+    config_input.pull_up_en = GPIO_PULLUP_DISABLE;
     gpio_config(&config_input);
 
     // Loop
-    while(1) {   
+    while(1)
+    {   
+        int level = gpio_get_level(INPUT_PIN);
+        if (level) {
+            printf("Pressed\n");
+            gpio_set_level(LED_PIN, level);
+        }
+        else {
+            printf("Released\n");
+            gpio_set_level(LED_PIN, level);
+        }
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 

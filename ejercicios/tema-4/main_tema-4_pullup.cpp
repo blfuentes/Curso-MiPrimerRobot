@@ -29,7 +29,17 @@ void app_main() {
     gpio_config(&config_input);
 
     // Loop
-    while(1) {   
+    while(1)
+    {   
+        int level = gpio_get_level(INPUT_PIN);
+        if (level) {
+            printf("Released\n");
+            gpio_set_level(LED_PIN, level);
+        }
+        else {
+            printf("Pressed\n");
+            gpio_set_level(LED_PIN, level);
+        }
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 

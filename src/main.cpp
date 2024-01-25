@@ -14,8 +14,8 @@ void app_main() {
 
     // confgfure ledc timer
     ledc_timer_config_t ledc_timer;
-    ledc_timer.duty_resolution = LEDC_TIMER_2_BIT;
-    ledc_timer.freq_hz = 500;
+    ledc_timer.duty_resolution = LEDC_TIMER_10_BIT;
+    ledc_timer.freq_hz = 2500;
     ledc_timer.speed_mode = LEDC_HIGH_SPEED_MODE;
     ledc_timer.timer_num = LEDC_TIMER_0;
     ledc_timer_config(&ledc_timer);
@@ -52,14 +52,14 @@ void app_main() {
                 printf("Incrementing led_state_count.\n");
                 printf("led_state_count: %d\n", led_state_count);
                 printf("ledc_timer.duty_resolution: %d\n", ledc_timer.duty_resolution);
-                led_state_count++;
+                led_state_count += 1024 / 4;
             }
             else
             {
                 printf("Decrementing led_state_count.\n");
                 printf("led_state_count: %d\n", led_state_count);
                 printf("ledc_timer.duty_resolution: %d\n", ledc_timer.duty_resolution);
-                led_state_count--;
+                led_state_count -= 1024 / 4;
             }
 
             if (led_state_direction)
@@ -73,6 +73,7 @@ void app_main() {
                 led_state_direction = led_state_count <= 0;
             }
         }
+        // int mapped_led_state_count = (led_state_count * 1024) / 4;
 
         ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, led_state_count);
         ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);

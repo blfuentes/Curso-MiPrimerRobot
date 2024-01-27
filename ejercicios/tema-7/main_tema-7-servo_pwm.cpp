@@ -44,8 +44,8 @@ void app_main()
     int led_state_count = 0;
     bool led_state_direction = true;
 
-    // 1024 = 20ms
-    // x = 1ms  -> 1024 / 20 = 51.2
+    // 1024 = 25ms
+    // x = 0.5 -> 512 /  = 20.48
 
     // Loop
     while (1) 
@@ -56,13 +56,13 @@ void app_main()
 
             if (led_state_direction)
             {
-                led_state_count = 51.2 * 1000;
+                led_state_count = 22;
                 led_state_direction = false;
                 printf("Setting to %d.\n", led_state_count);
             }
             else
             {
-                led_state_count = 51.2 * 2000;
+                led_state_count = 102;
                 led_state_direction = true;
                 printf("Setting to %d.\n", led_state_count);
             }

@@ -25,8 +25,8 @@ extern "C" void app_main();
 
 void motor_control(int motor, int speed, int direction) {
     if (motor == 0) { // Motor A
-        gpio_set_level(MOTOR_01_IN_1, direction);
-        gpio_set_level(MOTOR_01_IN_2, !direction);
+        gpio_set_level(MOTOR_01_IN_1, !direction);
+        gpio_set_level(MOTOR_01_IN_2, direction);
         ledc_set_duty(LEDC_SPEED_MODE, LEDC_CHANNEL_0, speed);
         ledc_update_duty(LEDC_SPEED_MODE, LEDC_CHANNEL_0);
     } else if (motor == 1) { // Motor B
@@ -114,6 +114,8 @@ void app_main() {
     config_input.pull_up_en = GPIO_PULLUP_DISABLE;
     gpio_config(&config_input);
 
+    bool running = false;
+
     // Loop
     while(1)
     {   
@@ -122,16 +124,27 @@ void app_main() {
             printf("Pressed\n");
             gpio_set_level(LED_PIN, level);
 
-            motor_control(0, 512, 1);
-            motor_control(1, 512, 1);
+            // motor_control(0, 512, 1);
+            // motor_control(1, 512, 1);
+
+            running = !running;
         }
         else {
             printf("Released\n");
             gpio_set_level(LED_PIN, level);
 
+            // motor_control(0, 0, 1);
+            // motor_control(1, 0, 1);
+        }
+        vTaskDelay(pdMS_TO_TICKS(50));
+
+        if (running) {
+            motor_control(0, 512, 1);
+            motor_control(1, 512, 1);
+        }
+        else {
             motor_control(0, 0, 1);
             motor_control(1, 0, 1);
         }
-        vTaskDelay(pdMS_TO_TICKS(50));
     }
 }

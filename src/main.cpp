@@ -27,7 +27,7 @@ constexpr gpio_num_t STBY = GPIO_NUM_33;
 
 constexpr ledc_mode_t LEDC_SPEED_MODE = LEDC_LOW_SPEED_MODE;
 
-constexpr u_int16_t DEFAULT_SENSOR_VALUE = 2700;
+constexpr u_int16_t DEFAULT_SENSOR_VALUE = 3000;
 
 // mux pins
 constexpr gpio_num_t MUX_SIG = GPIO_NUM_32; // adc
@@ -38,6 +38,27 @@ constexpr gpio_num_t MUX_S3 = GPIO_NUM_4;  // salida
 
 extern "C" void app_main();
 
+int random(int min, int max) {
+    return min + (rand() % (max - min + 1));
+}
+
+void read_mux(MuxDefinition *mux, bool *initiSensor) {
+    for (int i = 0; i < 8; i++) {
+        // set the channel
+        set_mux_channel(i, *mux);
+
+        // read the value
+        uint16_t adc_value = adc1_get_raw((*mux).channel);
+        if (*initiSensor) {
+            (*mux).sensor_values[i] = adc_value;
+        } else {
+            (*mux).prev_sensor_values[i] = (*mux).sensor_values[i];
+            (*mux).sensor_values[i] = adc_value;
+        }
+        // printf("Value of channel %d: %d\n", i, adc_value);
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
 
 void app_main() {
 
@@ -75,7 +96,6 @@ void app_main() {
 
     bool running = true;
     bool initiSensor = true;
-    bool turning = false;
 
     // MUX
     configure_pin_pwm(sig);
@@ -89,6 +109,8 @@ void app_main() {
     adc1_config_channel_atten(mux.channel, ADC_ATTEN_DB_11);
 
     // Loop
+    vTaskDelay(pdMS_TO_TICKS(3000));
+
     while(1)
     {   
         int level = gpio_get_level(INPUT_PIN);
@@ -107,7 +129,10 @@ void app_main() {
             // printf("Running\n");
             // move_forward(motor_a, motor_b);
 
+            // execute movement
+            // perform_movement(initiSensor, motor_a, motor_b, mux);
             // read the 8 channels
+            // read_mux(&mux, &initiSensor);
             for (int i = 0; i < 8; i++) {
                 // set the channel
                 set_mux_channel(i, mux);
@@ -121,23 +146,51 @@ void app_main() {
                     mux.sensor_values[i] = adc_value;
                 }
                 // printf("Value of channel %d: %d\n", i, adc_value);
-                vTaskDelay(pdMS_TO_TICKS(10));
+                // vTaskDelay(pdMS_TO_TICKS(10));
             }
             if (!initiSensor) {
-                int desviation = get_desviation(mux);
-                if (desviation == 0) {
-                    printf("Move forward\n");
+                MuxOperationResult op_result = get_desviation(mux);
+                // printf("main: Current point: %d, Desviation: %d\n", op_result.currentPoint, op_result.desviation);
+                if (op_result.currentPoint == 3 || op_result.currentPoint == 4) {
+                    // printf("Centered!");
                     move_forward(motor_a, motor_b);
-                    turning = false;
-                } else
-                if (desviation == 1) {
-                    printf("Turn right\n");
-                    turn_right_forward(motor_a, motor_b);
-                    turning = true;
-                } else if (desviation == -1) {
-                    printf("Turn left\n");
-                    turn_left_forward(motor_a, motor_b);
-                    turning = true;
+                } else {
+                    while (op_result.currentPoint != 3 && op_result.currentPoint != 4) {
+                        if (op_result.desviation == 1) {
+                            // printf("Turn right\n");
+                            turn_right_forward(motor_a, motor_b);
+                        } else if (op_result.desviation == -1) {
+                            // printf("Turn left\n");
+                            turn_left_forward(motor_a, motor_b);
+                        } else {
+                            int random_turn = random(0, 1);
+                            if (random_turn) {
+                                // printf("Turn right\n");
+                                turn_right_forward(motor_a, motor_b);
+                            } else {
+                                // printf("Turn left\n");
+                                turn_left_forward(motor_a, motor_b);
+                            }
+                        }
+                        // vTaskDelay(pdMS_TO_TICKS(1000));
+                        for (int i = 0; i < 8; i++) {
+                            // set the channel
+                            set_mux_channel(i, mux);
+
+                            // read the value
+                            uint16_t adc_value = adc1_get_raw(mux.channel);
+                            if (initiSensor) {
+                                mux.sensor_values[i] = adc_value;
+                            } else {
+                                mux.prev_sensor_values[i] = mux.sensor_values[i];
+                                mux.sensor_values[i] = adc_value;
+                            }
+                            // printf("Value of channel %d: %d\n", i, adc_value);
+                            // vTaskDelay(pdMS_TO_TICKS(10));
+                        }
+                        op_result = get_desviation(mux);
+                        // printf("Current point: %d, Desviation: %d\n", op_result.currentPoint, op_result.desviation);
+                    }
                 }
             }
             initiSensor = false;
@@ -153,6 +206,6 @@ void app_main() {
         // } else {
         //     vTaskDelay(pdMS_TO_TICKS(50));
         // }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }

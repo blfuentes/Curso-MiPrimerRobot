@@ -94,7 +94,7 @@ void app_main() {
    // Initialize STBY pin to enable motor driver by default
     gpio_set_level(STBY, 1);
 
-    bool running = true;
+    bool running = false;
     bool initiSensor = true;
 
     // MUX

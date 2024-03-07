@@ -6,7 +6,7 @@
 
 #include <PinControl.h>
 
-constexpr u_int16_t DEFAULT_SPEED = 128;
+constexpr u_int16_t DEFAULT_SPEED = 192;
 
 // Motor definition
 struct MotorDefinition {

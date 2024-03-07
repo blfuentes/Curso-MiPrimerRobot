@@ -56,7 +56,7 @@ void read_mux(MuxDefinition *mux, bool *initiSensor) {
             (*mux).sensor_values[i] = adc_value;
         }
         // printf("Value of channel %d: %d\n", i, adc_value);
-        vTaskDelay(pdMS_TO_TICKS(10));
+        // vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
@@ -132,22 +132,8 @@ void app_main() {
             // execute movement
             // perform_movement(initiSensor, motor_a, motor_b, mux);
             // read the 8 channels
-            // read_mux(&mux, &initiSensor);
-            for (int i = 0; i < 8; i++) {
-                // set the channel
-                set_mux_channel(i, mux);
-
-                // read the value
-                uint16_t adc_value = adc1_get_raw(mux.channel);
-                if (initiSensor) {
-                    mux.sensor_values[i] = adc_value;
-                } else {
-                    mux.prev_sensor_values[i] = mux.sensor_values[i];
-                    mux.sensor_values[i] = adc_value;
-                }
-                // printf("Value of channel %d: %d\n", i, adc_value);
-                // vTaskDelay(pdMS_TO_TICKS(10));
-            }
+            read_mux(&mux, &initiSensor);
+            // vTaskDelay(pdMS_TO_TICKS(3000));
             if (!initiSensor) {
                 MuxOperationResult op_result = get_desviation(mux);
                 // printf("main: Current point: %d, Desviation: %d\n", op_result.currentPoint, op_result.desviation);
@@ -173,21 +159,7 @@ void app_main() {
                             }
                         }
                         // vTaskDelay(pdMS_TO_TICKS(1000));
-                        for (int i = 0; i < 8; i++) {
-                            // set the channel
-                            set_mux_channel(i, mux);
-
-                            // read the value
-                            uint16_t adc_value = adc1_get_raw(mux.channel);
-                            if (initiSensor) {
-                                mux.sensor_values[i] = adc_value;
-                            } else {
-                                mux.prev_sensor_values[i] = mux.sensor_values[i];
-                                mux.sensor_values[i] = adc_value;
-                            }
-                            // printf("Value of channel %d: %d\n", i, adc_value);
-                            // vTaskDelay(pdMS_TO_TICKS(10));
-                        }
+                        read_mux(&mux, &initiSensor);
                         op_result = get_desviation(mux);
                         // printf("Current point: %d, Desviation: %d\n", op_result.currentPoint, op_result.desviation);
                     }

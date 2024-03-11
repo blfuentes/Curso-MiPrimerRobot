@@ -42,6 +42,17 @@ int random(int min, int max) {
     return min + (rand() % (max - min + 1));
 }
 
+void control_on_off(bool *running) {
+    int level = gpio_get_level(INPUT_PIN);
+    if (level) {
+        printf("Pressed\n");
+        gpio_set_level(LED_PIN, level);
+
+        *running = !*running;
+    }
+    vTaskDelay(pdMS_TO_TICKS(50));
+}
+
 void read_mux(MuxDefinition *mux, bool *initiSensor) {
     for (int i = 0; i < 8; i++) {
         // set the channel
@@ -57,6 +68,47 @@ void read_mux(MuxDefinition *mux, bool *initiSensor) {
         }
         // printf("Value of channel %d: %d\n", i, adc_value);
         // vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+void perform_movement(MuxDefinition *mux, MotorDefinition *motor_a, MotorDefinition *motor_b, bool *running, bool *initiSensor) {
+    MuxOperationResult op_result = get_desviation(*mux);
+    // printf("main: Current point: %d, Desviation: %d\n", op_result.currentPoint, op_result.desviation);
+    if (op_result.currentPoint == 3 || op_result.currentPoint == 4) {
+        // printf("Centered!");
+        move_forward(*motor_a, *motor_b);
+    }
+    else
+    {
+        while (op_result.currentPoint != 3 && op_result.currentPoint != 4) {
+            control_on_off(running);
+            if (!*running) {
+                break;
+            }
+            if (op_result.desviation == 1) {
+                // printf("Turn right\n");
+                turn_right_forward(*motor_a, *motor_b);
+            }
+            else if (op_result.desviation == -1) {
+                // printf("Turn left\n");
+                turn_left_forward(*motor_a, *motor_b);
+            }
+            else {
+                int random_turn = random(0, 1);
+                if (random_turn) {
+                    // printf("Turn right\n");
+                    turn_right_forward(*motor_a, *motor_b);
+                }
+                else {
+                    // printf("Turn left\n");
+                    turn_left_forward(*motor_a, *motor_b);
+                }
+            }
+            // vTaskDelay(pdMS_TO_TICKS(1000));
+            read_mux(mux, initiSensor);
+            op_result = get_desviation(*mux);
+            // printf("Current point: %d, Desviation: %d\n", op_result.currentPoint, op_result.desviation);
+        }
     }
 }
 
@@ -113,17 +165,7 @@ void app_main() {
 
     while(1)
     {   
-        int level = gpio_get_level(INPUT_PIN);
-        if (level) {
-            printf("Pressed\n");
-            gpio_set_level(LED_PIN, level);
-
-            running = !running;
-        }
-        // else {
-        //     printf("Released\n");
-        //     gpio_set_level(LED_PIN, level);
-        // }
+        control_on_off(&running);
 
         if (running) {
             // printf("Running\n");
@@ -135,49 +177,14 @@ void app_main() {
             read_mux(&mux, &initiSensor);
             // vTaskDelay(pdMS_TO_TICKS(3000));
             if (!initiSensor) {
-                MuxOperationResult op_result = get_desviation(mux);
-                // printf("main: Current point: %d, Desviation: %d\n", op_result.currentPoint, op_result.desviation);
-                if (op_result.currentPoint == 3 || op_result.currentPoint == 4) {
-                    // printf("Centered!");
-                    move_forward(motor_a, motor_b);
-                } else {
-                    while (op_result.currentPoint != 3 && op_result.currentPoint != 4) {
-                        if (op_result.desviation == 1) {
-                            // printf("Turn right\n");
-                            turn_right_forward(motor_a, motor_b);
-                        } else if (op_result.desviation == -1) {
-                            // printf("Turn left\n");
-                            turn_left_forward(motor_a, motor_b);
-                        } else {
-                            int random_turn = random(0, 1);
-                            if (random_turn) {
-                                // printf("Turn right\n");
-                                turn_right_forward(motor_a, motor_b);
-                            } else {
-                                // printf("Turn left\n");
-                                turn_left_forward(motor_a, motor_b);
-                            }
-                        }
-                        // vTaskDelay(pdMS_TO_TICKS(1000));
-                        read_mux(&mux, &initiSensor);
-                        op_result = get_desviation(mux);
-                        // printf("Current point: %d, Desviation: %d\n", op_result.currentPoint, op_result.desviation);
-                    }
-                }
+                perform_movement(&mux, &motor_a, &motor_b, &running, &initiSensor);
             }
             initiSensor = false;
         }
         else {
-            printf("Stopped\n");
-            // move_backward(motor_a, motor_b);
+            printf("STOP MOTOR!!!\n");
             halt_stop(motor_a, motor_b);
         }
-        
-        // if (turning) {
-        //     vTaskDelay(pdMS_TO_TICKS(500));
-        // } else {
-        //     vTaskDelay(pdMS_TO_TICKS(50));
-        // }
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 }

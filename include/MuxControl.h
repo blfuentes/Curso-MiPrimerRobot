@@ -69,7 +69,6 @@ MuxOperationResult get_desviation(MuxDefinition mux) {
     }
 
     MuxOperationResult result = { num, desviation };
-    // printf("Mux: Num: %d, Prev_num: %d, Desviation: %d \n", num, prev_num, desviation);
 
     return result;
 }

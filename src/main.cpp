@@ -53,29 +53,30 @@ void control_on_off(bool *running) {
     vTaskDelay(pdMS_TO_TICKS(50));
 }
 
-void read_mux(MuxDefinition *mux, bool *initiSensor) {
+void read_mux(MuxDefinition *mux, bool isInitSensor) {
     for (int i = 0; i < 8; i++) {
         // set the channel
         set_mux_channel(i, *mux);
 
         // read the value
         uint16_t adc_value = adc1_get_raw((*mux).channel);
-        if (*initiSensor) {
+        if (!isInitSensor) {
             (*mux).sensor_values[i] = adc_value;
         } else {
             (*mux).prev_sensor_values[i] = (*mux).sensor_values[i];
             (*mux).sensor_values[i] = adc_value;
         }
-        // printf("Value of channel %d: %d\n", i, adc_value);
-        // vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
-void perform_movement(MuxDefinition *mux, MotorDefinition *motor_a, MotorDefinition *motor_b, bool *running, bool *initiSensor) {
+void perform_movement(MuxDefinition *mux, MotorDefinition *motor_a, MotorDefinition *motor_b, bool *running, bool *isInitSensor) {
+    if (!*running && *isInitSensor) {
+        halt_stop(*motor_a, *motor_b);
+        return;
+    }
+    read_mux(mux, *isInitSensor);
     MuxOperationResult op_result = get_desviation(*mux);
-    // printf("main: Current point: %d, Desviation: %d\n", op_result.currentPoint, op_result.desviation);
     if (op_result.currentPoint == 3 || op_result.currentPoint == 4) {
-        // printf("Centered!");
         move_forward(*motor_a, *motor_b);
     }
     else
@@ -83,31 +84,26 @@ void perform_movement(MuxDefinition *mux, MotorDefinition *motor_a, MotorDefinit
         while (op_result.currentPoint != 3 && op_result.currentPoint != 4) {
             control_on_off(running);
             if (!*running) {
+                halt_stop(*motor_a, *motor_b);
                 break;
             }
             if (op_result.desviation == 1) {
-                // printf("Turn right\n");
                 turn_right_forward(*motor_a, *motor_b);
             }
             else if (op_result.desviation == -1) {
-                // printf("Turn left\n");
                 turn_left_forward(*motor_a, *motor_b);
             }
             else {
                 int random_turn = random(0, 1);
                 if (random_turn) {
-                    // printf("Turn right\n");
                     turn_right_forward(*motor_a, *motor_b);
                 }
                 else {
-                    // printf("Turn left\n");
                     turn_left_forward(*motor_a, *motor_b);
                 }
             }
-            // vTaskDelay(pdMS_TO_TICKS(1000));
-            read_mux(mux, initiSensor);
+            read_mux(mux, *isInitSensor);
             op_result = get_desviation(*mux);
-            // printf("Current point: %d, Desviation: %d\n", op_result.currentPoint, op_result.desviation);
         }
     }
 }
@@ -147,7 +143,7 @@ void app_main() {
     gpio_set_level(STBY, 1);
 
     bool running = false;
-    bool initiSensor = true;
+    bool isInitSensor = false;
 
     // MUX
     configure_pin_pwm(sig);
@@ -165,26 +161,8 @@ void app_main() {
 
     while(1)
     {   
-        control_on_off(&running);
+        perform_movement(&mux, &motor_a, &motor_b, &running, &isInitSensor);
 
-        if (running) {
-            // printf("Running\n");
-            // move_forward(motor_a, motor_b);
-
-            // execute movement
-            // perform_movement(initiSensor, motor_a, motor_b, mux);
-            // read the 8 channels
-            read_mux(&mux, &initiSensor);
-            // vTaskDelay(pdMS_TO_TICKS(3000));
-            if (!initiSensor) {
-                perform_movement(&mux, &motor_a, &motor_b, &running, &initiSensor);
-            }
-            initiSensor = false;
-        }
-        else {
-            printf("STOP MOTOR!!!\n");
-            halt_stop(motor_a, motor_b);
-        }
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 }

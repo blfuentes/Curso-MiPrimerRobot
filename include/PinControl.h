@@ -12,8 +12,6 @@ struct PinGPIODefinition {
     gpio_num_t pin;
     gpio_mode_t mode;
     gpio_pulldown_t pull_down;
-    // gpio_pull_mode_t pull_mode;
-    // gpio_int_type_t int_type;
 };
 
 struct PingPWMDefinition {

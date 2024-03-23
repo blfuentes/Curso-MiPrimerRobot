@@ -29,9 +29,9 @@ MuxOperationResult get_desviation(MuxDefinition mux) {
     int desviation = 0;
     if (num == -1) {
         // no sensor detected, out of range
-        if (prev_num <= 1) {
+        if (prev_num <= 2) {
             desviation = -1; // turn left to find the line
-        } else if (prev_num >= 6) {
+        } else if (prev_num >= 5) {
             desviation = 1; // turn right to find the line
         }
     } else {

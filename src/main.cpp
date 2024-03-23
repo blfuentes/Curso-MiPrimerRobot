@@ -53,7 +53,7 @@ void control_on_off(bool *running) {
     vTaskDelay(pdMS_TO_TICKS(50));
 }
 
-void read_mux(MuxDefinition *mux, bool isInitSensor) {
+void read_mux(MuxDefinition *mux, bool *isInitSensor) {
     for (int i = 0; i < 8; i++) {
         // set the channel
         set_mux_channel(i, *mux);
@@ -62,6 +62,8 @@ void read_mux(MuxDefinition *mux, bool isInitSensor) {
         uint16_t adc_value = adc1_get_raw((*mux).channel);
         if (!isInitSensor) {
             (*mux).sensor_values[i] = adc_value;
+            *isInitSensor = true;
+            
         } else {
             (*mux).prev_sensor_values[i] = (*mux).sensor_values[i];
             (*mux).sensor_values[i] = adc_value;
@@ -70,17 +72,20 @@ void read_mux(MuxDefinition *mux, bool isInitSensor) {
 }
 
 void perform_movement(MuxDefinition *mux, MotorDefinition *motor_a, MotorDefinition *motor_b, bool *running, bool *isInitSensor) {
-    if (!*running && *isInitSensor) {
+    if (!*running) {
+        control_on_off(running);
         halt_stop(*motor_a, *motor_b);
         return;
     }
-    read_mux(mux, *isInitSensor);
+    read_mux(mux, isInitSensor);
     MuxOperationResult op_result = get_desviation(*mux);
     if (op_result.currentPoint == 3 || op_result.currentPoint == 4) {
         move_forward(*motor_a, *motor_b);
+        control_on_off(running);
     }
     else
     {
+        printf("o.Current point %d - Desviation: %d\n", op_result.currentPoint, op_result.desviation);
         while (op_result.currentPoint != 3 && op_result.currentPoint != 4) {
             control_on_off(running);
             if (!*running) {
@@ -102,8 +107,9 @@ void perform_movement(MuxDefinition *mux, MotorDefinition *motor_a, MotorDefinit
                     turn_left_forward(*motor_a, *motor_b);
                 }
             }
-            read_mux(mux, *isInitSensor);
+            read_mux(mux, isInitSensor);
             op_result = get_desviation(*mux);
+            printf("i.Current point %d - Desviation: %d\n", op_result.currentPoint, op_result.desviation);
         }
     }
 }

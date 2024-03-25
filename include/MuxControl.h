@@ -16,7 +16,12 @@ struct MuxDefinition {
     uint16_t prev_sensor_values[8];
     uint16_t sensor_values[8];
 
-    uint16_t default_value;
+    int default_value;
+
+    int p_error;
+    int correction;
+    int integral;
+    int derivative;
 };
 
 struct MuxOperationResult {
@@ -24,9 +29,15 @@ struct MuxOperationResult {
     int desviation;
 };
 
+constexpr float KP = 0.01f;
+constexpr float KI = 0.000f;
+constexpr float KD = 0.000f;
+
 void set_mux_channel(uint8_t channel, MuxDefinition mux);
 
 int get_transform(uint16_t values[], u_int16_t default_value);
+
+int32_t get_correction(MuxDefinition *mux);
 
 MuxOperationResult get_desviation(MuxDefinition mux);
 

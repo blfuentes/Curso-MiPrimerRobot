@@ -4,7 +4,7 @@
 #include "driver/ledc.h"
 #include "esp_err.h"
 
-constexpr u_int16_t DEFAULT_SPEED = 192;
+constexpr int DEFAULT_SPEED = 128;
 
 // Motor definition
 struct MotorDefinition {
@@ -18,18 +18,20 @@ struct MotorDefinition {
 
 void configure_motor(MotorDefinition motor);
 
+void drive(MotorDefinition motor_a, MotorDefinition motor_b, int correction);
+
 void halt_stop(MotorDefinition motor_a, MotorDefinition motor_b);
 
-void move_forward(MotorDefinition motor_a, MotorDefinition motor_b);
+void move_forward(MotorDefinition motor_a, MotorDefinition motor_b, int correction);
 
-void turn_right_forward(MotorDefinition motor_a, MotorDefinition motor_b);
+void turn_right_forward(MotorDefinition motor_a, MotorDefinition motor_b, int correction);
 
-void turn_left_forward(MotorDefinition motor_a, MotorDefinition motor_b);
+void turn_left_forward(MotorDefinition motor_a, MotorDefinition motor_b, int correction);
 
-void move_backward(MotorDefinition motor_a, MotorDefinition motor_b);
+void move_backward(MotorDefinition motor_a, MotorDefinition motor_b, int correction);
 
-void turn_right_backward (MotorDefinition motor_a, MotorDefinition motor_b);
+void turn_right_backward (MotorDefinition motor_a, MotorDefinition motor_b, int correction);
 
-void turn_left_backward (MotorDefinition motor_a, MotorDefinition motor_b);
+void turn_left_backward (MotorDefinition motor_a, MotorDefinition motor_b, int correction);
 
 void stop(MotorDefinition motor_a, MotorDefinition motor_b);

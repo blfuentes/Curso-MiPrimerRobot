@@ -16,6 +16,22 @@ void configure_motor(MotorDefinition motor) {
     configure_pin_pwm(motor_pwm);
 }
 
+void drive(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
+    int left_speed = DEFAULT_SPEED + correction;
+    int right_speed = DEFAULT_SPEED - correction;
+    printf("Correction: %d - Left speed: %d, Right speed: %d\n", correction, left_speed, right_speed);
+    // Motor A - izquierdo
+    gpio_set_level(motor_a.in1, 0);
+    gpio_set_level(motor_a.in2, 1);
+    ledc_set_duty(motor_a.speed_mode, LEDC_CHANNEL_0, left_speed);
+    ledc_update_duty(motor_a.speed_mode, LEDC_CHANNEL_0);
+    // Motor B - derecho
+    gpio_set_level(motor_b.in1, 1);
+    gpio_set_level(motor_b.in2, 0);
+    ledc_set_duty(motor_b.speed_mode, LEDC_CHANNEL_1, right_speed);
+    ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
+}
+
 void halt_stop(MotorDefinition motor_a, MotorDefinition motor_b) {
     // Motor A - izquierdo
     gpio_set_level(motor_a.in1, 0);
@@ -31,7 +47,7 @@ void halt_stop(MotorDefinition motor_a, MotorDefinition motor_b) {
 }
 
 // Motor control functions
-void move_forward(MotorDefinition motor_a, MotorDefinition motor_b) {
+void move_forward(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
     // Motor A - izquierdo
     gpio_set_level(motor_a.in1, 0);
     gpio_set_level(motor_a.in2, 1);
@@ -44,7 +60,7 @@ void move_forward(MotorDefinition motor_a, MotorDefinition motor_b) {
     ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
 }
 
-void turn_right_forward(MotorDefinition motor_a, MotorDefinition motor_b) {
+void turn_right_forward(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
     // Motor A - izquierdo
     gpio_set_level(motor_a.in1, 0);
     gpio_set_level(motor_a.in2, 1);
@@ -57,7 +73,7 @@ void turn_right_forward(MotorDefinition motor_a, MotorDefinition motor_b) {
     ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
 }
 
-void turn_left_forward(MotorDefinition motor_a, MotorDefinition motor_b) {
+void turn_left_forward(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
     // Motor A - izquierdo
     gpio_set_level(motor_a.in1, 0);
     gpio_set_level(motor_a.in2, 0);
@@ -70,7 +86,7 @@ void turn_left_forward(MotorDefinition motor_a, MotorDefinition motor_b) {
     ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
 }
 
-void move_backward(MotorDefinition motor_a, MotorDefinition motor_b) {
+void move_backward(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
     // Motor A - izquierdo
     gpio_set_level(motor_a.in1, 1);
     gpio_set_level(motor_a.in2, 0);
@@ -83,7 +99,7 @@ void move_backward(MotorDefinition motor_a, MotorDefinition motor_b) {
     ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
 }
 
-void turn_right_backward (MotorDefinition motor_a, MotorDefinition motor_b) {
+void turn_right_backward (MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
     // Motor A - izquierdo
     gpio_set_level(motor_a.in1, 0);
     gpio_set_level(motor_a.in2, 0);
@@ -96,7 +112,7 @@ void turn_right_backward (MotorDefinition motor_a, MotorDefinition motor_b) {
     ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);   
 }
 
-void turn_left_backward (MotorDefinition motor_a, MotorDefinition motor_b) {
+void turn_left_backward (MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
     // Motor A - izquierdo
     gpio_set_level(motor_a.in1, 1);
     gpio_set_level(motor_a.in2, 0);

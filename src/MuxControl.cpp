@@ -10,13 +10,23 @@ void set_mux_channel(uint8_t channel, MuxDefinition mux) {
 int get_transform(uint16_t values[], u_int16_t default_value) {
     int max_sensor = -1;
     for (int c = 0; c < 8; c++) {
-        // printf("Value of channel %d: %d\n", c, values[c]);
         if (default_value < values[c] && max_sensor < c){
-            // printf("Mux: Max sensor: %d\n", c);
             max_sensor = c;
         };     
     }
     return max_sensor;  
+}
+
+int32_t get_correction(MuxDefinition *mux) {
+    int p_error = -4*(mux->sensor_values[0]) - 3*(mux->sensor_values[1]) - 2*(mux->sensor_values[2]) - (mux->sensor_values[3]) + 
+                    (mux->sensor_values[4]) + 2*(mux->sensor_values[5]) + 3*(mux->sensor_values[6]) + 4*(mux->sensor_values[7]);
+    mux->integral += p_error;
+    mux->derivative = p_error - mux->p_error;
+    mux->p_error = p_error;
+    mux->correction = (int)(KP * p_error + KI * mux->integral + KD * mux->derivative);
+    // printf("Values: %d, %d, %d, %d, %d, %d, %d, %d\n", mux->sensor_values[0], mux->sensor_values[1], mux->sensor_values[2], mux->sensor_values[3], mux->sensor_values[4], mux->sensor_values[5], mux->sensor_values[6], mux->sensor_values[7]);
+    // printf("P_error: %d, Integral: %d, Derivative: %d, Correction: %d\n", p_error, mux->integral, mux->derivative, mux->correction);
+    return mux->correction;
 }
 
 /// @brief Get the desviation of the car

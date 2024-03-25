@@ -46,7 +46,7 @@ void control_on_off(bool *running) {
     int level = gpio_get_level(INPUT_PIN);
     if (level) {
         printf("Pressed\n");
-        gpio_set_level(LED_PIN, level);
+        gpio_set_level(LED_PIN, !*running);
 
         *running = !*running;
     }
@@ -59,59 +59,29 @@ void read_mux(MuxDefinition *mux, bool *isInitSensor) {
         set_mux_channel(i, *mux);
 
         // read the value
-        uint16_t adc_value = adc1_get_raw((*mux).channel);
+        uint16_t adc_value = adc1_get_raw(mux->channel);
         if (!isInitSensor) {
-            (*mux).sensor_values[i] = adc_value;
+            mux->sensor_values[i] = adc_value;
             *isInitSensor = true;
             
         } else {
-            (*mux).prev_sensor_values[i] = (*mux).sensor_values[i];
-            (*mux).sensor_values[i] = adc_value;
+            mux->prev_sensor_values[i] = mux->sensor_values[i];
+            mux->sensor_values[i] = adc_value;
         }
     }
 }
 
-void perform_movement(MuxDefinition *mux, MotorDefinition *motor_a, MotorDefinition *motor_b, bool *running, bool *isInitSensor) {
+void perform_movement(u_int16_t *correction, MuxDefinition *mux, MotorDefinition *motor_a, MotorDefinition *motor_b, bool *running, bool *isInitSensor) {
     if (!*running) {
         control_on_off(running);
         halt_stop(*motor_a, *motor_b);
         return;
     }
+
     read_mux(mux, isInitSensor);
-    MuxOperationResult op_result = get_desviation(*mux);
-    if (op_result.currentPoint == 3 || op_result.currentPoint == 4) {
-        move_forward(*motor_a, *motor_b);
-        control_on_off(running);
-    }
-    else
-    {
-        printf("o.Current point %d - Desviation: %d\n", op_result.currentPoint, op_result.desviation);
-        while (op_result.currentPoint != 3 && op_result.currentPoint != 4) {
-            control_on_off(running);
-            if (!*running) {
-                halt_stop(*motor_a, *motor_b);
-                break;
-            }
-            if (op_result.desviation == 1) {
-                turn_right_forward(*motor_a, *motor_b);
-            }
-            else if (op_result.desviation == -1) {
-                turn_left_forward(*motor_a, *motor_b);
-            }
-            else {
-                int random_turn = random(0, 1);
-                if (random_turn) {
-                    turn_right_forward(*motor_a, *motor_b);
-                }
-                else {
-                    turn_left_forward(*motor_a, *motor_b);
-                }
-            }
-            read_mux(mux, isInitSensor);
-            op_result = get_desviation(*mux);
-            printf("i.Current point %d - Desviation: %d\n", op_result.currentPoint, op_result.desviation);
-        }
-    }
+    int32_t correction_value = get_correction(mux);
+    drive(*motor_a, *motor_b, correction_value);
+    control_on_off(running);
 }
 
 void app_main() {
@@ -130,7 +100,7 @@ void app_main() {
     PinGPIODefinition s2 = { MUX_S2, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
     PinGPIODefinition s3 = { MUX_S3, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
 
-    MuxDefinition mux = { ADC1_CHANNEL_4, MUX_SIG, MUX_S0, MUX_S1, MUX_S2, MUX_S3, {0}, {0}, DEFAULT_SENSOR_VALUE };
+    MuxDefinition mux = { ADC1_CHANNEL_4, MUX_SIG, MUX_S0, MUX_S1, MUX_S2, MUX_S3, {0}, {0}, DEFAULT_SENSOR_VALUE, 0, 0, 0, 0 };
 
     // Configure MOTOR_A | MOTOR_B
     configure_motor(motor_a);
@@ -150,6 +120,7 @@ void app_main() {
 
     bool running = false;
     bool isInitSensor = false;
+    u_int16_t correction = 0;
 
     // MUX
     configure_pin_pwm(sig);
@@ -163,11 +134,11 @@ void app_main() {
     adc1_config_channel_atten(mux.channel, ADC_ATTEN_DB_11);
 
     // Loop
-    vTaskDelay(pdMS_TO_TICKS(3000));
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
     while(1)
     {   
-        perform_movement(&mux, &motor_a, &motor_b, &running, &isInitSensor);
+        perform_movement(&correction, &mux, &motor_a, &motor_b, &running, &isInitSensor);
 
         vTaskDelay(pdMS_TO_TICKS(1));
     }

@@ -53,24 +53,6 @@ void control_on_off(bool *running) {
     vTaskDelay(pdMS_TO_TICKS(50));
 }
 
-void read_mux(MuxDefinition *mux, bool *isInitSensor) {
-    for (int i = 0; i < 8; i++) {
-        // set the channel
-        set_mux_channel(i, *mux);
-
-        // read the value
-        uint16_t adc_value = adc1_get_raw(mux->channel);
-        if (!isInitSensor) {
-            mux->sensor_values[i] = adc_value;
-            *isInitSensor = true;
-            
-        } else {
-            mux->prev_sensor_values[i] = mux->sensor_values[i];
-            mux->sensor_values[i] = adc_value;
-        }
-    }
-}
-
 void perform_movement(u_int16_t *correction, MuxDefinition *mux, MotorDefinition *motor_a, MotorDefinition *motor_b, bool *running, bool *isInitSensor) {
     if (!*running) {
         control_on_off(running);

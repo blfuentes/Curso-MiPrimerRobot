@@ -35,6 +35,8 @@ constexpr float KD = 0.000f;
 
 void set_mux_channel(uint8_t channel, MuxDefinition mux);
 
+void read_mux(MuxDefinition *mux, bool *isInitSensor);
+
 int get_transform(uint16_t values[], u_int16_t default_value);
 
 int32_t get_correction(MuxDefinition *mux);

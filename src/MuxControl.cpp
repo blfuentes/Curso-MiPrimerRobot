@@ -7,6 +7,24 @@ void set_mux_channel(uint8_t channel, MuxDefinition mux) {
     gpio_set_level(mux.s3, (channel >> 3) & 0x01);
 }
 
+void read_mux(MuxDefinition *mux, bool *isInitSensor) {
+    for (int i = 0; i < 8; i++) {
+        // set the channel
+        set_mux_channel(i, *mux);
+
+        // read the value
+        uint16_t adc_value = adc1_get_raw(mux->channel);
+        if (!isInitSensor) {
+            mux->sensor_values[i] = adc_value;
+            *isInitSensor = true;
+            
+        } else {
+            mux->prev_sensor_values[i] = mux->sensor_values[i];
+            mux->sensor_values[i] = adc_value;
+        }
+    }
+}
+
 int get_transform(uint16_t values[], u_int16_t default_value) {
     int max_sensor = -1;
     for (int c = 0; c < 8; c++) {

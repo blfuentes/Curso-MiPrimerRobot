@@ -4,7 +4,7 @@
 #include "driver/ledc.h"
 #include "esp_err.h"
 
-constexpr int DEFAULT_SPEED = 128;
+constexpr int DEFAULT_SPEED = 160;
 
 // Motor definition
 struct MotorDefinition {

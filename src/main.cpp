@@ -27,8 +27,6 @@ constexpr gpio_num_t STBY = GPIO_NUM_33;
 
 constexpr ledc_mode_t LEDC_SPEED_MODE = LEDC_LOW_SPEED_MODE;
 
-constexpr u_int16_t DEFAULT_SENSOR_VALUE = 3000;
-
 // mux pins
 constexpr gpio_num_t MUX_SIG = GPIO_NUM_32; // adc
 constexpr gpio_num_t MUX_S0 = GPIO_NUM_21; // salida 
@@ -82,7 +80,7 @@ void app_main() {
     PinGPIODefinition s2 = { MUX_S2, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
     PinGPIODefinition s3 = { MUX_S3, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
 
-    MuxDefinition mux = { ADC1_CHANNEL_4, MUX_SIG, MUX_S0, MUX_S1, MUX_S2, MUX_S3, {0}, {0}, DEFAULT_SENSOR_VALUE, 0, 0, 0, 0 };
+    MuxDefinition mux = { ADC1_CHANNEL_4, MUX_SIG, MUX_S0, MUX_S1, MUX_S2, MUX_S3, {0}, {0}, 0, 0, 0, 0 };
 
     // Configure MOTOR_A | MOTOR_B
     configure_motor(motor_a);

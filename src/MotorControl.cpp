@@ -19,7 +19,7 @@ void configure_motor(MotorDefinition motor) {
 void drive(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
     int left_speed = DEFAULT_SPEED + correction;
     int right_speed = DEFAULT_SPEED - correction;
-    printf("Correction: %d - Left speed: %d, Right speed: %d\n", correction, left_speed, right_speed);
+    // printf("Correction: %d - Left speed: %d, Right speed: %d\n", correction, left_speed, right_speed);
     // Motor A - izquierdo
     gpio_set_level(motor_a.in1, 0);
     gpio_set_level(motor_a.in2, 1);

@@ -44,7 +44,7 @@ int random(int min, int max) {
 void control_on_off(Robot *robot) {
     int level = gpio_get_level(INPUT_PIN);
     if (level) {
-        printf("Pressed\n");
+        // printf("Pressed\n");
         gpio_set_level(LED_PIN, !robot->running);
 
         robot->running = !robot->running;
@@ -52,7 +52,7 @@ void control_on_off(Robot *robot) {
     vTaskDelay(pdMS_TO_TICKS(50));
 };
 
-void perform_movement(Robot *robot) {
+void run(Robot *robot) {
     if (!robot->running) {
         control_on_off(robot);
         robot->Stop();
@@ -85,7 +85,7 @@ void app_main() {
 
     while(1)
     {   
-        perform_movement(&robot);
+        run(&robot);
 
         vTaskDelay(pdMS_TO_TICKS(1));
     }

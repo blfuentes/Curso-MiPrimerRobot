@@ -8,18 +8,17 @@
 #include "esp_err.h"
 #include "PinDefinition.h"
 
-constexpr int DEFAULT_SPEED = 160;
+constexpr int DEFAULT_SPEED = 256;
 
 // Motor definition
 class MotorDefinition {
-
-public:
     PinGPIODefinition in1Def;
     PinGPIODefinition in2Def;
     PinPWMDefinition pwmDef;
     ledc_channel_t channel;
     ledc_mode_t speed_mode;
     ledc_timer_t timer;
+public:
     MotorDefinition();
     MotorDefinition(gpio_num_t in1, gpio_num_t in2, gpio_num_t pwm, ledc_channel_t channel, ledc_mode_t speed_mode, ledc_timer_t timer);
     void Configure();

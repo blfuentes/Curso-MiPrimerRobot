@@ -12,7 +12,6 @@ class Robot {
     MuxDefinition mux;
 public:
     bool running;
-    bool isInitSensor;
     Robot(
         gpio_num_t MOTOR_A_IN_1, gpio_num_t MOTOR_A_IN_2, gpio_num_t MOTOR_A_PWM, 
         gpio_num_t MOTOR_B_IN_1, gpio_num_t MOTOR_B_IN_2, gpio_num_t MOTOR_B_PWM, 

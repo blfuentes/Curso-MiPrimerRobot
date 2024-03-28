@@ -6,7 +6,7 @@ Robot::Robot(
     gpio_num_t stby_pin, ledc_mode_t speed_mode, 
     adc1_channel_t muxchannel, gpio_num_t sig, gpio_num_t s0, gpio_num_t s1, gpio_num_t s2, gpio_num_t s3)
 {
-    printf("Creating robot\n");
+    // printf("Creating robot\n");
     this->left_motor = MotorDefinition(MOTOR_A_IN_1, MOTOR_A_IN_2, MOTOR_A_PWM, LEDC_CHANNEL_0, speed_mode, LEDC_TIMER_0);
     this->right_motor = MotorDefinition(MOTOR_B_IN_1, MOTOR_B_IN_2, MOTOR_B_PWM, LEDC_CHANNEL_1, speed_mode, LEDC_TIMER_1);
 
@@ -24,13 +24,12 @@ Robot::Robot(
     adc1_config_channel_atten(mux.Channel(), ADC_ATTEN_DB_11);
 
     this->running = false;
-    this->isInitSensor = false;
 };
 
 void Robot::Perform_movement()
 {
-    printf("Performing movement\n");
-    this->isInitSensor = mux.Read_mux(this->isInitSensor);
+    // printf("Performing movement\n");
+    mux.Read_mux();
     int32_t correction_value = mux.Get_correction();
     this->left_motor.Drive(0, 1, correction_value);
     this->right_motor.Drive(1, 0, -correction_value);
@@ -38,7 +37,7 @@ void Robot::Perform_movement()
 
 void Robot::Stop()
 {
-    printf("Stopping robot\n");
+    // printf("Stopping robot\n");
     this->left_motor.Stop();
     this->right_motor.Stop();
 };

@@ -9,7 +9,7 @@
 #include "driver/adc.h"
 #include "PinDefinition.h"
 
-constexpr float KP = .0125f;//.125f;
+constexpr float KP = .06f;//.125f;
 constexpr float KI = .0;//.03125f;
 constexpr float KD = .0;//.0625f;//.0625f;
 
@@ -21,7 +21,6 @@ class MuxDefinition {
     gpio_num_t s2;
     gpio_num_t s3;
 
-    uint16_t prev_sensor_values[8];
     uint16_t sensor_values[8];
 
     int p_error;
@@ -39,7 +38,7 @@ public:
     MuxDefinition(adc1_channel_t channel, gpio_num_t sig, gpio_num_t s0, gpio_num_t s1, gpio_num_t s2, gpio_num_t s3, ledc_mode_t speed_mode);
     void Configure();
     void Set_mux_channel(uint8_t channel);
-    bool Read_mux(bool isInitSensor);
+    void Read_mux();
     int32_t Get_correction();
     adc1_channel_t Channel() { return channel; }
 };

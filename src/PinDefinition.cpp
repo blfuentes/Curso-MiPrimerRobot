@@ -6,7 +6,7 @@ PinGPIODefinition::PinGPIODefinition(){};
 
 PinGPIODefinition::PinGPIODefinition(gpio_num_t pin, gpio_mode_t mode, gpio_pulldown_t pull_down)
 {
-    printf("Creating pingpio %d\n", pin);
+    // printf("Creating pingpio %d\n", pin);
     this->pin = pin;
     this->mode = mode;
     this->pull_down = pull_down;
@@ -14,7 +14,7 @@ PinGPIODefinition::PinGPIODefinition(gpio_num_t pin, gpio_mode_t mode, gpio_pull
 
 void PinGPIODefinition::Configure()
 {
-    printf("Configuring pin %d\n", pin);
+    // printf("Configuring pin %d\n", pin);
     gpio_config_t io_conf;
     io_conf.intr_type = GPIO_INTR_DISABLE;
     io_conf.mode = mode;
@@ -28,7 +28,7 @@ PinPWMDefinition::PinPWMDefinition(){};
 
 PinPWMDefinition::PinPWMDefinition(gpio_num_t pin, ledc_channel_t channel, ledc_mode_t speed_mode, ledc_timer_t timer)
 {
-    printf("Creating pinpwm %d\n", pin);
+    // printf("Creating pinpwm %d\n", pin);
     this->pin = pin;
     this->channel = channel;
     this->speed_mode = speed_mode;
@@ -37,7 +37,7 @@ PinPWMDefinition::PinPWMDefinition(gpio_num_t pin, ledc_channel_t channel, ledc_
 
 void PinPWMDefinition::Configure()
 {
-    printf("Configuring pin %d\n", pin);
+    // printf("Configuring pin %d\n", pin);
     ledc_timer_config_t ledc_timer_motor;
     ledc_timer_motor.duty_resolution = LEDC_TIMER_10_BIT;
     ledc_timer_motor.freq_hz = 1000; // Set output frequency at 1 kHz

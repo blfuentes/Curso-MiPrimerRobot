@@ -6,9 +6,10 @@
 #include "esp_err.h"
 #include "driver/adc.h"
 
-#include <MotorControl.h>
-#include <PinControl.h>
-#include <MuxControl.h>
+#include "Robot.h"
+#include "MuxControl.h"
+#include "MotorControl.h"
+#include "PinDefinition.h"
 
 // control gpio pins
 constexpr gpio_num_t LED_PIN = GPIO_NUM_22;
@@ -38,88 +39,54 @@ extern "C" void app_main();
 
 int random(int min, int max) {
     return min + (rand() % (max - min + 1));
-}
+};
 
-void control_on_off(bool *running) {
+void control_on_off(Robot *robot) {
     int level = gpio_get_level(INPUT_PIN);
     if (level) {
         printf("Pressed\n");
-        gpio_set_level(LED_PIN, !*running);
+        gpio_set_level(LED_PIN, !robot->running);
 
-        *running = !*running;
+        robot->running = !robot->running;
     }
     vTaskDelay(pdMS_TO_TICKS(50));
-}
+};
 
-void perform_movement(u_int16_t *correction, MuxDefinition *mux, MotorDefinition *motor_a, MotorDefinition *motor_b, bool *running, bool *isInitSensor) {
-    if (!*running) {
-        control_on_off(running);
-        halt_stop(*motor_a, *motor_b);
+void perform_movement(Robot *robot) {
+    if (!robot->running) {
+        control_on_off(robot);
+        robot->Stop();
         return;
     }
 
-    read_mux(mux, isInitSensor);
-    int32_t correction_value = get_correction(mux);
-    drive(*motor_a, *motor_b, correction_value);
-    control_on_off(running);
-}
+    robot->Perform_movement();
+    control_on_off(robot);
+};
 
 void app_main() {
-
     // Setup
-    MotorDefinition motor_a = { MOTOR_A_IN_1, MOTOR_A_IN_2, MOTOR_A_PWM, LEDC_CHANNEL_0,  LEDC_SPEED_MODE, LEDC_TIMER_0 };
-    MotorDefinition motor_b = { MOTOR_B_IN_1, MOTOR_B_IN_2, MOTOR_B_PWM, LEDC_CHANNEL_1,  LEDC_SPEED_MODE, LEDC_TIMER_1 };
-    
-    PinGPIODefinition stby = { STBY, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
-    PinGPIODefinition led = { LED_PIN, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
-    PinGPIODefinition input = { INPUT_PIN, GPIO_MODE_INPUT, GPIO_PULLDOWN_ENABLE };
+    Robot robot = Robot(
+        MOTOR_A_IN_1, MOTOR_A_IN_2, MOTOR_A_PWM, 
+        MOTOR_B_IN_1, MOTOR_B_IN_2, MOTOR_B_PWM, 
+        STBY, LEDC_SPEED_MODE, 
+        ADC1_CHANNEL_4, MUX_SIG, MUX_S0, MUX_S1, MUX_S2, MUX_S3); 
 
-    PingPWMDefinition sig = { MUX_SIG, LEDC_CHANNEL_2, LEDC_SPEED_MODE, LEDC_TIMER_2 };
-    PinGPIODefinition s0 = { MUX_S0, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
-    PinGPIODefinition s1 = { MUX_S1, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
-    PinGPIODefinition s2 = { MUX_S2, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
-    PinGPIODefinition s3 = { MUX_S3, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
-
-    MuxDefinition mux = { ADC1_CHANNEL_4, MUX_SIG, MUX_S0, MUX_S1, MUX_S2, MUX_S3, {0}, {0}, 0, 0, 0, 0 };
-
-    // Configure MOTOR_A | MOTOR_B
-    configure_motor(motor_a);
-    configure_motor(motor_b);
-
-    // Configure STBY pin as output
-    configure_pin_gpio(stby);
+    PinGPIODefinition led = PinGPIODefinition(LED_PIN, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE);
+    PinGPIODefinition input = PinGPIODefinition(INPUT_PIN, GPIO_MODE_INPUT, GPIO_PULLDOWN_ENABLE);
 
     // config ouput pin
-    configure_pin_gpio(led);
+    led.Configure();
 
     // config input pin
-    configure_pin_gpio(input);
-
-   // Initialize STBY pin to enable motor driver by default
-    gpio_set_level(STBY, 1);
-
-    bool running = false;
-    bool isInitSensor = false;
-    u_int16_t correction = 0;
-
-    // MUX
-    configure_pin_pwm(sig);
-    configure_pin_gpio(s0);
-    configure_pin_gpio(s1);
-    configure_pin_gpio(s2);
-    configure_pin_gpio(s3);
-
-    //ADC
-    adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten(mux.channel, ADC_ATTEN_DB_11);
+    input.Configure();
 
     // Loop
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     while(1)
     {   
-        perform_movement(&correction, &mux, &motor_a, &motor_b, &running, &isInitSensor);
+        perform_movement(&robot);
 
         vTaskDelay(pdMS_TO_TICKS(1));
     }
-}
+};

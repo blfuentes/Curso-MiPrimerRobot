@@ -1,139 +1,47 @@
-// Motor configuration functions
 #include "MotorControl.h"
-#include "PinControl.h"
+#include "PinDefinition.h"
 
-void configure_motor(MotorDefinition motor) {
+MotorDefinition::MotorDefinition(){};
+
+MotorDefinition::MotorDefinition(gpio_num_t in1, gpio_num_t in2, gpio_num_t pwm, ledc_channel_t channel, ledc_mode_t speed_mode, ledc_timer_t timer)
+{
+    printf("Creating motor\n");
+    this->in1Def = PinGPIODefinition(in1, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE);
+    this->in2Def = PinGPIODefinition(in2, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE);
+    this->pwmDef = PinPWMDefinition(pwm, channel, speed_mode, timer);
+    this->channel = channel;
+    this->speed_mode = speed_mode;
+    this->timer = timer;
+};
+
+void MotorDefinition::Configure()
+{
+    printf("Configuring motor\n");
     // Configure MOTOR_IN1 pin as output
-    PinGPIODefinition motor_in1 = { motor.in1, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
-    configure_pin_gpio(motor_in1);
+    this->in1Def.Configure();
 
     // Configure MOTOR_IN_2 pin as output
-    PinGPIODefinition motor_in2 = { motor.in2, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE };
-    configure_pin_gpio(motor_in2);
+    this->in2Def.Configure();
 
     // Prepare and then apply the LEDC PWM timer configuration
-    PingPWMDefinition motor_pwm = { motor.pwm, motor.channel, motor.speed_mode, motor.timer };
-    configure_pin_pwm(motor_pwm);
-}
+    this->pwmDef.Configure();
+};
 
-void drive(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
-    int left_speed = DEFAULT_SPEED + correction;
-    int right_speed = DEFAULT_SPEED - correction;
-    // printf("Correction: %d - Left speed: %d, Right speed: %d\n", correction, left_speed, right_speed);
-    // Motor A - izquierdo
-    gpio_set_level(motor_a.in1, 0);
-    gpio_set_level(motor_a.in2, 1);
-    ledc_set_duty(motor_a.speed_mode, LEDC_CHANNEL_0, left_speed);
-    ledc_update_duty(motor_a.speed_mode, LEDC_CHANNEL_0);
-    // Motor B - derecho
-    gpio_set_level(motor_b.in1, 1);
-    gpio_set_level(motor_b.in2, 0);
-    ledc_set_duty(motor_b.speed_mode, LEDC_CHANNEL_1, right_speed);
-    ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
-}
+void MotorDefinition::Drive(u_int32_t in1_level, u_int32_t in2_level, int correction)
+{
+    printf("Driving motor\n");
+    gpio_set_level(this->in1Def.Pin(), in1_level);
+    gpio_set_level(this->in2Def.Pin(), in2_level);
 
-void halt_stop(MotorDefinition motor_a, MotorDefinition motor_b) {
-    // Motor A - izquierdo
-    gpio_set_level(motor_a.in1, 0);
-    gpio_set_level(motor_a.in2, 0);
-    ledc_set_duty(motor_a.speed_mode, LEDC_CHANNEL_0, 0);
-    ledc_update_duty(motor_a.speed_mode, LEDC_CHANNEL_0);
-    // Motor B - derecho
-    gpio_set_level(motor_b.in1, 0);
-    gpio_set_level(motor_b.in2, 0);
-    ledc_set_duty(motor_b.speed_mode, LEDC_CHANNEL_1, 0);
-    ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
+    ledc_set_duty(this->speed_mode, this->channel, DEFAULT_SPEED + correction);
+    ledc_update_duty(this->speed_mode, this->channel);
+};
 
-}
-
-// Motor control functions
-void move_forward(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
-    // Motor A - izquierdo
-    gpio_set_level(motor_a.in1, 0);
-    gpio_set_level(motor_a.in2, 1);
-    ledc_set_duty(motor_a.speed_mode, LEDC_CHANNEL_0, DEFAULT_SPEED);
-    ledc_update_duty(motor_a.speed_mode, LEDC_CHANNEL_0);
-    // Motor B - derecho
-    gpio_set_level(motor_b.in1, 1);
-    gpio_set_level(motor_b.in2, 0);
-    ledc_set_duty(motor_b.speed_mode, LEDC_CHANNEL_1, DEFAULT_SPEED);
-    ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
-}
-
-void turn_right_forward(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
-    // Motor A - izquierdo
-    gpio_set_level(motor_a.in1, 0);
-    gpio_set_level(motor_a.in2, 1);
-    ledc_set_duty(motor_a.speed_mode, LEDC_CHANNEL_0, DEFAULT_SPEED);
-    ledc_update_duty(motor_a.speed_mode, LEDC_CHANNEL_0);
-    // Motor B - derecho
-    gpio_set_level(motor_b.in1, 0);
-    gpio_set_level(motor_b.in2, 0);
-    ledc_set_duty(motor_b.speed_mode, LEDC_CHANNEL_1, 0);
-    ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
-}
-
-void turn_left_forward(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
-    // Motor A - izquierdo
-    gpio_set_level(motor_a.in1, 0);
-    gpio_set_level(motor_a.in2, 0);
-    ledc_set_duty(motor_a.speed_mode, LEDC_CHANNEL_0, 0);
-    ledc_update_duty(motor_a.speed_mode, LEDC_CHANNEL_0);
-    // Motor B - derecho
-    gpio_set_level(motor_b.in1, 1);
-    gpio_set_level(motor_b.in2, 0);
-    ledc_set_duty(motor_b.speed_mode, LEDC_CHANNEL_1, DEFAULT_SPEED);
-    ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
-}
-
-void move_backward(MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
-    // Motor A - izquierdo
-    gpio_set_level(motor_a.in1, 1);
-    gpio_set_level(motor_a.in2, 0);
-    ledc_set_duty(motor_a.speed_mode, LEDC_CHANNEL_0, DEFAULT_SPEED);
-    ledc_update_duty(motor_a.speed_mode, LEDC_CHANNEL_0);
-    // Motor B - derecho
-    gpio_set_level(motor_b.in1, 0);
-    gpio_set_level(motor_b.in2, 1);
-    ledc_set_duty(motor_b.speed_mode, LEDC_CHANNEL_1, DEFAULT_SPEED);
-    ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
-}
-
-void turn_right_backward (MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
-    // Motor A - izquierdo
-    gpio_set_level(motor_a.in1, 0);
-    gpio_set_level(motor_a.in2, 0);
-    ledc_set_duty(motor_a.speed_mode, LEDC_CHANNEL_0, 0);
-    ledc_update_duty(motor_a.speed_mode, LEDC_CHANNEL_0);
-    // Motor B - derecho
-    gpio_set_level(motor_b.in1, 0);
-    gpio_set_level(motor_b.in2, 1);
-    ledc_set_duty(motor_b.speed_mode, LEDC_CHANNEL_1, DEFAULT_SPEED);
-    ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);   
-}
-
-void turn_left_backward (MotorDefinition motor_a, MotorDefinition motor_b, int correction) {
-    // Motor A - izquierdo
-    gpio_set_level(motor_a.in1, 1);
-    gpio_set_level(motor_a.in2, 0);
-    ledc_set_duty(motor_a.speed_mode, LEDC_CHANNEL_0, DEFAULT_SPEED);
-    ledc_update_duty(motor_a.speed_mode, LEDC_CHANNEL_0);
-    // Motor B - derecho
-    gpio_set_level(motor_b.in1, 0);
-    gpio_set_level(motor_b.in2, 0);
-    ledc_set_duty(motor_b.speed_mode, LEDC_CHANNEL_1, 0);
-    ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);   
-}
-
-void stop(MotorDefinition motor_a, MotorDefinition motor_b) {
-    // Motor A - izquierdo
-    gpio_set_level(motor_a.in1, 0);
-    gpio_set_level(motor_a.in2, 0);
-    ledc_set_duty(motor_a.speed_mode, LEDC_CHANNEL_0, 0);
-    ledc_update_duty(motor_a.speed_mode, LEDC_CHANNEL_0);
-    // Motor B - derecho
-    gpio_set_level(motor_b.in1, 0);
-    gpio_set_level(motor_b.in2, 0);
-    ledc_set_duty(motor_b.speed_mode, LEDC_CHANNEL_1, 0);
-    ledc_update_duty(motor_b.speed_mode, LEDC_CHANNEL_1);
-}
+void MotorDefinition::Stop()
+{
+    printf("Stopping motor\n");
+    gpio_set_level(this->in1Def.Pin(), 0);
+    gpio_set_level(this->in2Def.Pin(), 0);
+    ledc_set_duty(this->speed_mode, this->channel, 0);
+    ledc_update_duty(this->speed_mode, this->channel);
+};

@@ -24,13 +24,15 @@ Robot::Robot(
     adc1_config_channel_atten(mux.Channel(), ADC_ATTEN_DB_11);
 
     this->running = false;
+
+    this->pid_service = PidService();
 };
 
 void Robot::Perform_movement()
 {
     // printf("Performing movement\n");
     mux.Read_mux();
-    int32_t correction_value = mux.Get_correction();
+    int32_t correction_value = pid_service.Get_correction(mux.Sensor_values());
     this->left_motor.Drive(0, 1, correction_value);
     this->right_motor.Drive(1, 0, -correction_value);
 };

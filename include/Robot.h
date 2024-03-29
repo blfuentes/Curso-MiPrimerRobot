@@ -4,12 +4,14 @@
 #include "MotorControl.h"
 #include "MuxControl.h"
 #include "PinDefinition.h"
+#include "PIDService.h"
 
 class Robot {
     MotorDefinition left_motor;
     MotorDefinition right_motor;
     PinGPIODefinition stby;
     MuxDefinition mux;
+    PidService pid_service;
 public:
     bool running;
     Robot(

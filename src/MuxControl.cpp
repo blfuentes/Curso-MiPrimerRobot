@@ -30,7 +30,7 @@ void MuxDefinition::Configure()
     this->s3Def.Configure();
 };
 
-void MuxDefinition::Set_mux_channel(uint8_t channel)
+void MuxDefinition::SetMuxChannel(uint8_t channel)
 {
     // printf("Setting mux channel\n");
     gpio_set_level(s0, channel & 0x01);
@@ -39,15 +39,15 @@ void MuxDefinition::Set_mux_channel(uint8_t channel)
     gpio_set_level(s3, (channel >> 3) & 0x01);
 };
 
-void MuxDefinition::Read_mux()
+void MuxDefinition::ReadMux()
 {
     // printf("Reading mux\n");
     for (int i = 0; i < 8; i++) {
         // set the channel
-        Set_mux_channel(i);
+        SetMuxChannel(i);
 
         // read the value
         uint16_t adc_value = adc1_get_raw(channel);
-        sensor_values[i] = adc_value;
+        sensorValues[i] = adc_value;
     }
 };

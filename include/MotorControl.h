@@ -16,7 +16,7 @@ class MotorDefinition {
     PinGPIODefinition in2Def;
     PinPWMDefinition pwmDef;
     ledc_channel_t channel;
-    ledc_mode_t speed_mode;
+    ledc_mode_t speedMode;
     ledc_timer_t timer;
 public:
     MotorDefinition();

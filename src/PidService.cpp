@@ -11,16 +11,16 @@ PidService::PidService()
 int32_t PidService::GetCorrection(uint16_t* sensor_values)
 {
     // printf("Getting correction\n");
-    int p_error = -4*(sensor_values[0]) - 3*(sensor_values[1]) - 2*(sensor_values[2]) - (sensor_values[3]) + 
-                    (sensor_values[4]) + 2*(sensor_values[5]) + 3*(sensor_values[6]) + 4*(sensor_values[7]);
-    integral += p_error;
-    if (integral * p_error < 0) {
-        integral = 0;
+    int p_error = -7*(sensor_values[0]) - 5*(sensor_values[1]) - 3*(sensor_values[2]) - (sensor_values[3]) + 
+                    (sensor_values[4]) + 3*(sensor_values[5]) + 5*(sensor_values[6]) + 7*(sensor_values[7]);
+    this->integral += p_error;
+    if (this->integral * p_error < 0) {
+        this->integral = 0;
     }
-    derivative = p_error - p_error;
-    p_error = p_error;
-    correction = (int)(KP * p_error + KI * integral + KD * derivative);
+    this->derivative = p_error - this->pError;
+    this->pError = p_error;
+    this->correction = (int)(KP * p_error + KI * this->integral + KD * this->derivative);
     // printf("Values: %d, %d, %d, %d, %d, %d, %d, %d\n", sensor_values[0], sensor_values[1], sensor_values[2], sensor_values[3], sensor_values[4], sensor_values[5], sensor_values[6], sensor_values[7]);
     // printf("P_error: %d, Integral: %d, Derivative: %d, Correction: %d\n", p_error, integral, derivative, correction);
-    return correction;
+    return this->correction;
 };

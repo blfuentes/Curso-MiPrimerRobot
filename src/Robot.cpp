@@ -1,5 +1,7 @@
 #include "Robot.h"
 
+constexpr int MULTIPLIER = 1;
+
 Robot::Robot(
     gpio_num_t MOTOR_A_IN_1, gpio_num_t MOTOR_A_IN_2, gpio_num_t MOTOR_A_PWM, 
     gpio_num_t MOTOR_B_IN_1, gpio_num_t MOTOR_B_IN_2, gpio_num_t MOTOR_B_PWM, 
@@ -33,8 +35,8 @@ void Robot::PerformMovement()
     // printf("Performing movement\n");
     mux.ReadMux();
     int32_t correction_value = pidService.GetCorrection(mux.SensorValues());
-    this->leftMotor.Drive(0, 1, correction_value);
-    this->rightMotor.Drive(1, 0, -correction_value);
+    this->leftMotor.Drive(0, 1, correction_value * MULTIPLIER);
+    this->rightMotor.Drive(1, 0, -correction_value * MULTIPLIER);
 };
 
 void Robot::Stop()

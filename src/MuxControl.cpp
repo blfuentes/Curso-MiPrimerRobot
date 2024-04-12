@@ -2,17 +2,15 @@
 
 MuxDefinition::MuxDefinition(){};
 
-MuxDefinition::MuxDefinition(adc1_channel_t channel, gpio_num_t sig, gpio_num_t s0, gpio_num_t s1, gpio_num_t s2, gpio_num_t s3, ledc_mode_t speed_mode)
+MuxDefinition::MuxDefinition(adc1_channel_t channel, gpio_num_t s0, gpio_num_t s1, gpio_num_t s2, gpio_num_t s3, ledc_mode_t speed_mode)
 {
     // printf("Creating mux\n");
     this->channel = channel;
-    this->sig = sig;
     this->s0 = s0;
     this->s1 = s1;
     this->s2 = s2;
     this->s3 = s3;
 
-    this->sigDef = PinPWMDefinition(this->sig, LEDC_CHANNEL_2, speed_mode, LEDC_TIMER_2);
     this->s0Def = PinGPIODefinition(this->s0, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE);
     this->s1Def = PinGPIODefinition(this->s1, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE);
     this->s2Def = PinGPIODefinition(this->s2, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE);
@@ -23,7 +21,6 @@ void MuxDefinition::Configure()
 {
     // printf("Configuring mux\n");
     // MUX
-    this->sigDef.Configure();
     this->s0Def.Configure();
     this->s1Def.Configure();
     this->s2Def.Configure();
@@ -42,7 +39,7 @@ void MuxDefinition::SetMuxChannel(uint8_t channel)
 void MuxDefinition::ReadMux()
 {
     // printf("Reading mux\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < NUM_OF_SENSORS; i++) {
         // set the channel
         SetMuxChannel(i);
 

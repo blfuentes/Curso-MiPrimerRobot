@@ -3,11 +3,13 @@
 
 MotorDefinition::MotorDefinition(){};
 
-MotorDefinition::MotorDefinition(gpio_num_t in1, gpio_num_t in2, gpio_num_t pwm, ledc_channel_t channel, ledc_mode_t speed_mode, ledc_timer_t timer)
+MotorDefinition::MotorDefinition(gpio_num_t in1, gpio_num_t in2, u_int32_t in1_lvl, u_int32_t in2_lvl, gpio_num_t pwm, ledc_channel_t channel, ledc_mode_t speed_mode, ledc_timer_t timer)
 {
     // printf("Creating motor\n");
     this->in1Def = PinGPIODefinition(in1, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE);
     this->in2Def = PinGPIODefinition(in2, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE);
+    this->in1Level = in1_lvl;
+    this->in2Level = in2_lvl;
     this->pwmDef = PinPWMDefinition(pwm, channel, speed_mode, timer);
     this->channel = channel;
     this->speedMode = speed_mode;
@@ -25,15 +27,15 @@ void MotorDefinition::Configure()
 
     // Prepare and then apply the LEDC PWM timer configuration
     this->pwmDef.Configure();
+
+    gpio_set_level(this->in1Def.Pin(), this->in1Level);
+    gpio_set_level(this->in2Def.Pin(), this->in2Level);
 };
 
-void MotorDefinition::Drive(u_int32_t in1_level, u_int32_t in2_level, int correction)
+void MotorDefinition::Drive(int speed)
 {
     // printf("Driving motor\n");
-    gpio_set_level(this->in1Def.Pin(), in1_level);
-    gpio_set_level(this->in2Def.Pin(), in2_level);
-
-    ledc_set_duty(this->speedMode, this->channel, DEFAULT_SPEED + correction);
+    ledc_set_duty(this->speedMode, this->channel, speed);
     ledc_update_duty(this->speedMode, this->channel);
 };
 

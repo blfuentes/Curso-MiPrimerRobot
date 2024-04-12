@@ -8,7 +8,7 @@
 #include "esp_err.h"
 #include "PinDefinition.h"
 
-constexpr int DEFAULT_SPEED = 1024;
+constexpr int DEFAULT_SPEED = 650;
 
 // Motor definition
 class MotorDefinition {

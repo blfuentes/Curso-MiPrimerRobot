@@ -5,6 +5,7 @@
 #include "MuxControl.h"
 #include "PinDefinition.h"
 #include "PIDService.h"
+#include "pid.h"
 
 class Robot {
     MotorDefinition leftMotor;
@@ -12,6 +13,12 @@ class Robot {
     PinGPIODefinition stby;
     MuxDefinition mux;
     PidService pidService;
+    PID pid;
+    float result;
+    bool firstRun;
+    float lastLineValue;
+    uint64_t last_call;
+    uint64_t curr_time;
 public:
     bool running;
     Robot(

@@ -23,5 +23,4 @@ int32_t PidService::GetCorrection(uint16_t* sensor_values)
     // printf("Values: %d, %d, %d, %d, %d, %d, %d, %d\n", sensor_values[0], sensor_values[1], sensor_values[2], sensor_values[3], sensor_values[4], sensor_values[5], sensor_values[6], sensor_values[7]);
     // printf("P_error: %d, Integral: %d, Derivative: %d, Correction: %d\n", p_error, integral, derivative, correction);
     return this->correction;
-    // return p_error;
 };

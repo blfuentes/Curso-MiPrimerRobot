@@ -36,7 +36,7 @@ void MotorDefinition::Drive(int speed)
 {
     gpio_set_level(this->in1Def.Pin(), this->in1Level);
     gpio_set_level(this->in2Def.Pin(), this->in2Level);
-    
+
     // printf("Driving motor\n");
     ledc_set_duty(this->speedMode, this->channel, speed);
     ledc_update_duty(this->speedMode, this->channel);

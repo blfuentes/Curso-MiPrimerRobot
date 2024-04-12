@@ -14,11 +14,11 @@ class Robot {
     MuxDefinition mux;
     PidService pidService;
     PID pid;
-    float result;
+    float newSpeed;
     bool firstRun;
-    float lastLineValue;
-    uint64_t last_call;
-    uint64_t curr_time;
+    float correctionValue;
+    uint64_t lastCall;
+    uint64_t currTime;
 public:
     bool running;
     Robot(

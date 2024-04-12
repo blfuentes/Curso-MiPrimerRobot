@@ -45,6 +45,25 @@ void MuxDefinition::ReadMux()
 
         // read the value
         uint16_t adc_value = adc1_get_raw(channel);
+        // printf("ADC value: %d\n", adc_value);
         sensorValues[i] = adc_value;
     }
+};
+
+int32_t MuxDefinition::GetMuxValue()
+{
+    int32_t acum = 0;
+    int32_t weightened = 0;
+    uint16_t currentValue = 0;
+    // printf("Getting mux value\n");
+    for (int i = 0; i < NUM_OF_SENSORS; i++)
+    {
+        currentValue = sensorValues[i];
+        if(currentValue > 2048)
+        {
+            weightened += ((float)currentValue)*((float)i - ((NUM_OF_SENSORS-1)/2.0f))*100.0f;
+            acum += currentValue;
+        }
+    }
+    return (int32_t)weightened/acum;;
 };

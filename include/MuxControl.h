@@ -33,6 +33,7 @@ public:
     void ReadMux();
     adc1_channel_t Channel() { return channel; }
     uint16_t* SensorValues() { return sensorValues; }
+    int32_t GetMuxValue();
 };
 
 #endif // __MUXCONTROL_H__

@@ -32,38 +32,42 @@ Robot::Robot(
 
     this->pid = PID(50.0f, 0.0f, 0.0f);
 
-    this->result = 0.0f;
+    this->newSpeed = 0.0f;
     this->firstRun = true;
-    this->lastLineValue = esp_timer_get_time();
-    this->last_call = esp_timer_get_time();
+    this->correctionValue = 0.0f;
+    this->currTime = esp_timer_get_time();
+    this->lastCall = esp_timer_get_time();
 };
 
 void Robot::PerformMovement()
 {
     // printf("Performing movement\n");
     mux.ReadMux();
-    int32_t correction_value = pidService.GetCorrection(mux.SensorValues());
-    // lastLineValue = correction_value;
+    // vTaskDelay(pdMS_TO_TICKS(1500));
+    // ------------USING PID SERVICE--------------
+    this->correctionValue = pidService.GetCorrection(mux.SensorValues());
+    // -------------------------------------------
+
+    // --------------------USING PID--------------
+    // this->correctionValue = mux.GetMuxValue();
     // if (!firstRun)
     // {
-    //     curr_time = esp_timer_get_time();
-    //     result = pid.update(lastLineValue, curr_time - last_call);
-    //     result = result / 100.0f;
+    //     currTime = esp_timer_get_time();
+    //     newSpeed = pid.update(this->correctionValue, currTime - lastCall);
+    //     newSpeed = newSpeed / 100.0f;
 
-    //     if (result > 100)
+    //     if (newSpeed > 100)
     //     {
-    //         result = 100;
+    //         newSpeed = 100;
     //     }
     // }
-    // last_call = curr_time;
+    // lastCall = currTime;
     // firstRun = 0;
-    int32_t new_speed = correction_value * MULTIPLIER;
-    printf("Correction value: %ld\n", correction_value);
-    printf("Result: %f\n", result);
-    this->leftMotor.Drive(DEFAULT_SPEED + new_speed);
-    this->rightMotor.Drive(DEFAULT_SPEED - new_speed);
-    // this->leftMotor.Drive(DEFAULT_SPEED + result);
-    // this->rightMotor.Drive(DEFAULT_SPEED - result);
+    // ---------------------------------------------------
+    printf("Correction value: %f\n", this->correctionValue);
+    printf("Result: %f\n", newSpeed);
+    this->leftMotor.Drive(DEFAULT_SPEED + newSpeed);
+    this->rightMotor.Drive(DEFAULT_SPEED - newSpeed);
 };
 
 void Robot::Stop()

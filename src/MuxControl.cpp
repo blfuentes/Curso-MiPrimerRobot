@@ -65,5 +65,11 @@ int32_t MuxDefinition::GetMuxValue()
             acum += currentValue;
         }
     }
-    return (int32_t)weightened/acum;;
+    return (int32_t)weightened/acum;
+};
+
+int32_t MuxDefinition::GetMuxDesviation()
+{
+    return -7*(sensorValues[0]) - 5*(sensorValues[1]) - 3*(sensorValues[2]) - (sensorValues[3]) + 
+                    (sensorValues[4]) + 3*(sensorValues[5]) + 5*(sensorValues[6]) + 7*(sensorValues[7]);
 };

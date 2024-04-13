@@ -8,11 +8,9 @@ PidService::PidService()
     correction = 0;
 };
 
-int32_t PidService::GetCorrection(uint16_t* sensor_values)
+int32_t PidService::GetCorrection(int p_error)
 {
     // printf("Getting correction\n");
-    int p_error = -7*(sensor_values[0]) - 5*(sensor_values[1]) - 3*(sensor_values[2]) - (sensor_values[3]) + 
-                    (sensor_values[4]) + 3*(sensor_values[5]) + 5*(sensor_values[6]) + 7*(sensor_values[7]);
     this->integral += p_error;
     if (this->integral * p_error < 0) {
         this->integral = 0;

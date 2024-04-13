@@ -45,7 +45,8 @@ void Robot::PerformMovement()
     mux.ReadMux();
     // vTaskDelay(pdMS_TO_TICKS(1500));
     // ------------USING PID SERVICE--------------
-    this->correctionValue = pidService.GetCorrection(mux.SensorValues());
+    this->correctionValue = mux.GetMuxDesviation();
+    this->newSpeed = (int)pidService.GetCorrection(this->correctionValue);
     // -------------------------------------------
 
     // --------------------USING PID--------------

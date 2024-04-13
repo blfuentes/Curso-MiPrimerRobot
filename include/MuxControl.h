@@ -34,6 +34,7 @@ public:
     adc1_channel_t Channel() { return channel; }
     uint16_t* SensorValues() { return sensorValues; }
     int32_t GetMuxValue();
+    int32_t GetMuxDesviation();
 };
 
 #endif // __MUXCONTROL_H__

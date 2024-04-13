@@ -16,7 +16,7 @@ class MotorDefinition {
     PinGPIODefinition in2Def;
     PinPWMDefinition pwmDef;
     ledc_channel_t channel;
-    ledc_mode_t speedMode;
+    ledc_mode_t speed_mode;
     ledc_timer_t timer;
     u_int32_t in1Level;
     u_int32_t in2Level;

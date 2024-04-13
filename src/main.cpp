@@ -54,7 +54,7 @@ void run(Robot *robot) {
         return;
     }
 
-    robot->PerformMovement();
+    robot->Perform_movement();
     control_on_off(robot);
 };
 

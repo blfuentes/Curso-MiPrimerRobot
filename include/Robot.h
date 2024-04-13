@@ -7,11 +7,11 @@
 #include "PIDService.h"
 
 class Robot {
-    MotorDefinition left_motor;
-    MotorDefinition right_motor;
+    MotorDefinition leftMotor;
+    MotorDefinition rightMotor;
     PinGPIODefinition stby;
     MuxDefinition mux;
-    PidService pid_service;
+    PidService pidService;
 public:
     bool running;
     Robot(
@@ -19,7 +19,7 @@ public:
         gpio_num_t MOTOR_B_IN_1, gpio_num_t MOTOR_B_IN_2, gpio_num_t MOTOR_B_PWM, 
         gpio_num_t STBY, ledc_mode_t LEDC_SPEED_MODE, 
         adc1_channel_t muxchannel, gpio_num_t sig, gpio_num_t s0, gpio_num_t s1, gpio_num_t s2, gpio_num_t s3);
-    void Perform_movement();
+    void PerformMovement();
     void Stop();
 };
 

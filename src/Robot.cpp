@@ -43,32 +43,31 @@ void Robot::PerformMovement()
 {
     // printf("Performing movement\n");
     mux.ReadMux();
-    // vTaskDelay(pdMS_TO_TICKS(1500));
     // ------------USING PID SERVICE--------------
-    this->correctionValue = mux.GetMuxDesviation();
-    this->newSpeed = (int)pidService.GetCorrection(this->correctionValue);
+    // this->correctionValue = mux.GetMuxDesviation();
+    // this->newSpeed = (int)pidService.GetCorrection(this->correctionValue);
     // -------------------------------------------
 
     // --------------------USING PID--------------
-    // this->correctionValue = mux.GetMuxValue();
-    // if (!firstRun)
-    // {
-    //     currTime = esp_timer_get_time();
-    //     newSpeed = pid.update(this->correctionValue, currTime - lastCall);
-    //     newSpeed = newSpeed / 100.0f;
+    this->correctionValue = mux.GetMuxValue();
+    if (!this->firstRun)
+    {
+        this->currTime = esp_timer_get_time();
+        this->newSpeed = pid.update(this->correctionValue, this->currTime - this->lastCall);
+        this->newSpeed = this->newSpeed / 100.0f;
 
-    //     if (newSpeed > 100)
-    //     {
-    //         newSpeed = 100;
-    //     }
-    // }
-    // lastCall = currTime;
-    // firstRun = 0;
+        if (this->newSpeed > 100)
+        {
+            this->newSpeed = 100;
+        }
+    }
+    this->lastCall = this->currTime;
+    this->firstRun = 0;
     // ---------------------------------------------------
     printf("Correction value: %f\n", this->correctionValue);
-    printf("Result: %f\n", newSpeed);
-    this->leftMotor.Drive(DEFAULT_SPEED + newSpeed);
-    this->rightMotor.Drive(DEFAULT_SPEED - newSpeed);
+    printf("Result: %f\n", this->newSpeed);
+    this->leftMotor.Drive(DEFAULT_SPEED + this->newSpeed);
+    this->rightMotor.Drive(DEFAULT_SPEED - this->newSpeed);
 };
 
 void Robot::Stop()
@@ -76,4 +75,14 @@ void Robot::Stop()
     // printf("Stopping robot\n");
     this->leftMotor.Stop();
     this->rightMotor.Stop();
+};
+
+void Robot::Calibrate()
+{
+    printf("Calibrating...\n");
+    for (int i = 0; i < 20000; i++)
+    {
+        mux.Calibrate(i);
+    }
+    mux.SetUmbral();
 };

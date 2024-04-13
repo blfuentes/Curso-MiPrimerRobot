@@ -29,13 +29,13 @@ void MotorDefinition::Configure()
     this->pwmDef.Configure();
 };
 
-void MotorDefinition::Drive(int correction)
+void MotorDefinition::Drive(int speed)
 {
     // printf("Driving motor\n");
     gpio_set_level(this->in1Def.Pin(), this->in1Level);
     gpio_set_level(this->in2Def.Pin(), this->in2Level);
 
-    ledc_set_duty(this->speedMode, this->channel, DEFAULT_SPEED + correction);
+    ledc_set_duty(this->speedMode, this->channel, speed);
     ledc_update_duty(this->speedMode, this->channel);
 };
 

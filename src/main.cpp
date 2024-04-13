@@ -29,7 +29,6 @@ constexpr gpio_num_t STBY = GPIO_NUM_33;
 constexpr ledc_mode_t LEDC_SPEED_MODE = LEDC_LOW_SPEED_MODE;
 
 // mux pins
-constexpr gpio_num_t MUX_SIG = GPIO_NUM_32; // adc
 constexpr gpio_num_t MUX_S0 = GPIO_NUM_21; // salida 
 constexpr gpio_num_t MUX_S1 = GPIO_NUM_17; // salida
 constexpr gpio_num_t MUX_S2 = GPIO_NUM_16; // salida
@@ -69,7 +68,7 @@ void app_main() {
         MOTOR_A_IN_1, MOTOR_A_IN_2, MOTOR_A_PWM, 
         MOTOR_B_IN_1, MOTOR_B_IN_2, MOTOR_B_PWM, 
         STBY, LEDC_SPEED_MODE, 
-        ADC1_CHANNEL_4, MUX_SIG, MUX_S0, MUX_S1, MUX_S2, MUX_S3); 
+        ADC1_CHANNEL_4, MUX_S0, MUX_S1, MUX_S2, MUX_S3); 
 
     PinGPIODefinition led = PinGPIODefinition(LED_PIN, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE);
     PinGPIODefinition input = PinGPIODefinition(INPUT_PIN, GPIO_MODE_INPUT, GPIO_PULLDOWN_ENABLE);

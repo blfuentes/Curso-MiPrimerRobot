@@ -4,14 +4,14 @@ Robot::Robot(
     gpio_num_t MOTOR_A_IN_1, gpio_num_t MOTOR_A_IN_2, gpio_num_t MOTOR_A_PWM, 
     gpio_num_t MOTOR_B_IN_1, gpio_num_t MOTOR_B_IN_2, gpio_num_t MOTOR_B_PWM, 
     gpio_num_t stby_pin, ledc_mode_t speed_mode, 
-    adc1_channel_t muxchannel, gpio_num_t sig, gpio_num_t s0, gpio_num_t s1, gpio_num_t s2, gpio_num_t s3)
+    adc1_channel_t muxchannel, gpio_num_t s0, gpio_num_t s1, gpio_num_t s2, gpio_num_t s3)
 {
     // printf("Creating robot\n");
-    this->leftMotor = MotorDefinition(MOTOR_A_IN_1, MOTOR_A_IN_2, MOTOR_A_PWM, LEDC_CHANNEL_0, speed_mode, LEDC_TIMER_0);
-    this->rightMotor = MotorDefinition(MOTOR_B_IN_1, MOTOR_B_IN_2, MOTOR_B_PWM, LEDC_CHANNEL_1, speed_mode, LEDC_TIMER_1);
+    this->leftMotor = MotorDefinition(MOTOR_A_IN_1, MOTOR_A_IN_2, 0, 1, MOTOR_A_PWM, LEDC_CHANNEL_0, speed_mode, LEDC_TIMER_0);
+    this->rightMotor = MotorDefinition(MOTOR_B_IN_1, MOTOR_B_IN_2, 1, 0, MOTOR_B_PWM, LEDC_CHANNEL_1, speed_mode, LEDC_TIMER_1);
 
     this->stby = PinGPIODefinition(stby_pin, GPIO_MODE_OUTPUT, GPIO_PULLDOWN_DISABLE);
-    this->mux = MuxDefinition(muxchannel, sig, s0, s1, s2, s3, speed_mode);
+    this->mux = MuxDefinition(muxchannel, s0, s1, s2, s3, speed_mode);
 
     this->mux.Configure();
     this->leftMotor.Configure();
@@ -32,9 +32,9 @@ void Robot::PerformMovement()
 {
     // printf("Performing movement\n");
     mux.ReadMux();
-    int32_t correction_value = pidService.GetCorrection(mux.SensorValues());
-    this->leftMotor.Drive(0, 1, correction_value);
-    this->rightMotor.Drive(1, 0, -correction_value);
+    pidService.UpdateCorrection(mux.GetSensorPosition());
+    this->leftMotor.Drive(DEFAULT_SPEED + pidService.Correction());
+    this->rightMotor.Drive(DEFAULT_SPEED - pidService.Correction());
 };
 
 void Robot::Stop()

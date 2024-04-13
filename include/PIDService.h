@@ -13,7 +13,8 @@ class PidService {
     int derivative;
 public:
     PidService();
-    int32_t GetCorrection(uint16_t* values);
+    void UpdateCorrection(int16_t p_error);
+    int Correction() { return correction; }
 };
 
 #endif // __PIDSERVICE_H__

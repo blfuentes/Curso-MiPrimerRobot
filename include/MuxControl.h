@@ -20,19 +20,18 @@ class MuxDefinition {
 
     uint16_t sensorValues[8];
 
-    PinPWMDefinition sigDef;
     PinGPIODefinition s0Def;
     PinGPIODefinition s1Def;
     PinGPIODefinition s2Def;
     PinGPIODefinition s3Def;
 public:
     MuxDefinition();
-    MuxDefinition(adc1_channel_t channel, gpio_num_t sig, gpio_num_t s0, gpio_num_t s1, gpio_num_t s2, gpio_num_t s3, ledc_mode_t speed_mode);
+    MuxDefinition(adc1_channel_t channel, gpio_num_t s0, gpio_num_t s1, gpio_num_t s2, gpio_num_t s3, ledc_mode_t speed_mode);
     void Configure();
     void SetMuxChannel(uint8_t channel);
     void ReadMux();
     adc1_channel_t Channel() { return channel; }
-    uint16_t* SensorValues() { return sensorValues; }
+    int16_t GetSensorPosition();
 };
 
 #endif // __MUXCONTROL_H__

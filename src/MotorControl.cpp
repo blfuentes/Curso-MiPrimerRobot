@@ -27,9 +27,6 @@ void MotorDefinition::Configure()
 
     // Prepare and then apply the LEDC PWM timer configuration
     this->pwmDef.Configure();
-
-    gpio_set_level(this->in1Def.Pin(), this->in1Level);
-    gpio_set_level(this->in2Def.Pin(), this->in2Level);
 };
 
 void MotorDefinition::Drive(int speed)

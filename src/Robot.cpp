@@ -29,14 +29,6 @@ Robot::Robot(
     this->running = false;
 
     this->pidService = PidService();
-
-    this->pid = PID(50.0f, 0.0f, 0.0f);
-
-    this->newSpeed = 0.0f;
-    this->firstRun = true;
-    this->correctionValue = 0.0f;
-    this->currTime = esp_timer_get_time();
-    this->lastCall = esp_timer_get_time();
 };
 
 void Robot::PerformMovement()
@@ -44,30 +36,12 @@ void Robot::PerformMovement()
     // printf("Performing movement\n");
     mux.ReadMux();
     // ------------USING PID SERVICE--------------
-    // this->correctionValue = mux.GetMuxDesviation();
-    // this->newSpeed = (int)pidService.GetCorrection(this->correctionValue);
+    pidService.CalculateCorrection(mux.ReadSensorPosition());
     // -------------------------------------------
 
-    // --------------------USING PID--------------
-    this->correctionValue = mux.GetMuxValue();
-    if (!this->firstRun)
-    {
-        this->currTime = esp_timer_get_time();
-        this->newSpeed = pid.update(this->correctionValue, this->currTime - this->lastCall);
-        this->newSpeed = this->newSpeed / 100.0f;
-
-        if (this->newSpeed > 100)
-        {
-            this->newSpeed = 100;
-        }
-    }
-    this->lastCall = this->currTime;
-    this->firstRun = 0;
-    // ---------------------------------------------------
-    printf("Correction value: %f\n", this->correctionValue);
-    printf("Result: %f\n", this->newSpeed);
-    this->leftMotor.Drive(DEFAULT_SPEED + this->newSpeed);
-    this->rightMotor.Drive(DEFAULT_SPEED - this->newSpeed);
+    printf("Correction value: %d\n", pidService.Correction());
+    this->leftMotor.Drive(DEFAULT_SPEED + pidService.Correction());
+    this->rightMotor.Drive(DEFAULT_SPEED - pidService.Correction());
 };
 
 void Robot::Stop()
@@ -75,14 +49,4 @@ void Robot::Stop()
     // printf("Stopping robot\n");
     this->leftMotor.Stop();
     this->rightMotor.Stop();
-};
-
-void Robot::Calibrate()
-{
-    printf("Calibrating...\n");
-    for (int i = 0; i < 20000; i++)
-    {
-        mux.Calibrate(i);
-    }
-    mux.SetUmbral();
 };

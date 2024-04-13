@@ -78,12 +78,6 @@ void app_main() {
     // Loop
     vTaskDelay(pdMS_TO_TICKS(1000));
 
-    printf("Starting calibration...\n");
-    gpio_set_level(LED_PIN, 1);
-    robot.Calibrate();
-    printf("Calibration finished\n");
-    gpio_set_level(LED_PIN, 0);
-
     while(1)
     {   
         run(&robot);

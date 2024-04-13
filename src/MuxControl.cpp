@@ -45,73 +45,12 @@ void MuxDefinition::ReadMux()
 
         // read the value
         uint16_t adc_value = adc1_get_raw(channel);
-        // printf("ADC value: %d\n", adc_value);
         sensorValues[i] = adc_value;
     }
 };
 
-int32_t MuxDefinition::GetMuxValue()
-{
-    int32_t acum = 0;
-    int32_t weightened = 0;
-    uint16_t currentValue = 0;
-    // printf("Getting mux value\n");
-    for (int i = 0; i < NUM_OF_SENSORS; i++)
-    {
-        // printf("Sensor value: %lu - Umbral value: %lu\n", sensorValues[i], umbralValues[i]);
-        currentValue = sensorValues[i];
-        if(currentValue > umbralValues[i])
-        {
-            weightened += ((float)currentValue)*((float)i - ((NUM_OF_SENSORS-1)/2.0f))*100.0f;
-            acum += currentValue;
-        }
-    }
-    return (int32_t)weightened/acum;
-};
-
-int32_t MuxDefinition::GetMuxDesviation()
+int32_t MuxDefinition::ReadSensorPosition()
 {
     return -7*(sensorValues[0]) - 5*(sensorValues[1]) - 3*(sensorValues[2]) - (sensorValues[3]) + 
                     (sensorValues[4]) + 3*(sensorValues[5]) + 5*(sensorValues[6]) + 7*(sensorValues[7]);
-};
-
-void MuxDefinition::Calibrate(int run)
-{
-    // printf("Calibrating mux\n");
-    for (int i = 0; i < NUM_OF_SENSORS; i++)
-    {
-        SetMuxChannel(i);
-        uint16_t adc_value = adc1_get_raw(channel);
-        if (adc_value < 3400)
-        {
-            if ( whiteValues[i] == 0)
-            {
-                whiteValues[i] = adc_value;
-            }
-            else
-            {
-                whiteValues[i] = (whiteValues[i] + adc_value) / 2;
-            }
-        }
-        else
-        {
-            if ( blackValues[i] == 0)
-            {
-                blackValues[i] = adc_value;
-            }
-            else
-            {
-                blackValues[i] = (blackValues[i] + adc_value) / 2;
-            }
-        }
-    }
-};
-
-void MuxDefinition::SetUmbral()
-{
-    // printf("Setting umbral\n");
-    for (int i = 0; i < NUM_OF_SENSORS; i++)
-    {
-        umbralValues[i] = (whiteValues[i] + blackValues[i]) / 2;
-    }
 };

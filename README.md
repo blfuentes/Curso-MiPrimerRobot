@@ -5,9 +5,7 @@
 - Platformio
 
 ### Demo
-<video width="320" height="240" controls>
-  <source src="./doc/demo.mp4" type="video/mp4">
-</video>
+https://github.com/user-attachments/assets/93ca8dd1-7277-4c8a-af10-bb13ea7095ad
 
 ### Schema
 ![robot schema with fritzing](./doc/schema.png)
